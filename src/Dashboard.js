@@ -524,6 +524,18 @@ function Dashboard() {
             <button type="button">Reset</button>
           </div>
         </div>
+        {/* New tab: ایجاد پروژه */}
+        <div className="Dashboard-card" style={{ marginTop: 16, maxWidth: 1000, width: '100%' }}>
+          <div className="Dashboard-section-title" style={{ margin: '0 0 12px 0' }}>
+            ایجاد پروژه
+          </div>
+          <div style={{ marginBottom: 16, color: '#666', fontSize: '0.98rem' }}>
+            برای ایجاد پروژه جدید اینجا کلیک کنید.
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <button type="button">Send=&gt;</button>
+          </div>
+        </div>
         <div style={{ marginTop: 10, fontWeight: 500 }}>Result</div>
         <div style={{ fontWeight: 500, margin: '32px 0 8px 0', color: '#1976d2', fontSize: '1.1rem' }}>Messages</div>
         <div style={{ width: '100%', maxWidth: 700, maxHeight: 220, overflowY: 'auto', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: 8, marginBottom: 24 }}>
