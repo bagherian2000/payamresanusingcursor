@@ -221,6 +221,199 @@ function Dashboard() {
       });
   }, []);
 
+  const [curPrjId, setCurPrjId] = useState('');
+  const [resumeResult, setResumeResult] = useState('');
+  const [resumeResultClass, setResumeResultClass] = useState('');
+
+  const handleResume = async () => {
+    if (!curPrjId) {
+      setResumeResult('شناسه پروژه معتبر یافت نشد');
+      setResumeResultClass('error-message');
+      return;
+    }
+
+    setResumeResult('');
+    setResumeResultClass('');
+    try {
+      const soapEnvelope = `<?xml version="1.0" encoding="utf-8"?>
+      <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+          <Resume xmlns="http://tempuri.org/">
+            <strProjectsId>${curPrjId}</strProjectsId>
+          </Resume>
+        </soap:Body>
+      </soap:Envelope>`;
+
+      const response = await fetch('http://localhost:3001/api/soap-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/xml; charset=utf-8',
+          'SOAPAction': 'http://tempuri.org/Resume'
+        },
+        body: soapEnvelope
+      });
+
+      if (response.ok) {
+        const data = await response.text();
+        const parser = new window.DOMParser();
+        const xmlDoc = parser.parseFromString(data, 'text/xml');
+        const faultNode = xmlDoc.getElementsByTagName('soap:Fault')[0] || xmlDoc.getElementsByTagName('Fault')[0];
+        if (faultNode) {
+          const faultString = faultNode.getElementsByTagName('faultstring')[0]?.textContent || 'Unknown SOAP Fault';
+          const faultCode = faultNode.getElementsByTagName('faultcode')[0]?.textContent || '';
+          setResumeResult(`SOAP Fault${faultCode ? ` [${faultCode}]` : ''}: ${faultString}`);
+          setResumeResultClass('error-message');
+        } else {
+          const resultNode = xmlDoc.getElementsByTagName('ResumeResult')[0];
+          const resultText = resultNode ? resultNode.textContent : 'پاسخی دریافت نشد.';
+          setResumeResult(resultText);
+          setResumeResultClass('success-message');
+        }
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      setResumeResult('خطا در از سرگیری پروژه');
+      setResumeResultClass('error-message');
+      console.error('Resume SOAP error:', error);
+    }
+  };
+
+  const handlePause = async () => {
+    if (!curPrjId) {
+      setResumeResult('شناسه پروژه معتبر یافت نشد');
+      setResumeResultClass('error-message');
+      return;
+    }
+    setResumeResult('');
+    setResumeResultClass('');
+    try {
+      const soapEnvelope = `<?xml version="1.0" encoding="utf-8"?>
+      <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+          <Pause xmlns="http://tempuri.org/">
+            <strProjectsId>${curPrjId}</strProjectsId>
+          </Pause>
+        </soap:Body>
+      </soap:Envelope>`;
+      const response = await fetch('http://localhost:3001/api/soap-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/xml; charset=utf-8',
+          'SOAPAction': 'http://tempuri.org/Pause'
+        },
+        body: soapEnvelope
+      });
+      if (response.ok) {
+        const data = await response.text();
+        const parser = new window.DOMParser();
+        const xmlDoc = parser.parseFromString(data, 'text/xml');
+        const faultNode = xmlDoc.getElementsByTagName('soap:Fault')[0] || xmlDoc.getElementsByTagName('Fault')[0];
+        if (faultNode) {
+          const faultString = faultNode.getElementsByTagName('faultstring')[0]?.textContent || 'Unknown SOAP Fault';
+          const faultCode = faultNode.getElementsByTagName('faultcode')[0]?.textContent || '';
+          setResumeResult(`SOAP Fault${faultCode ? ` [${faultCode}]` : ''}: ${faultString}`);
+          setResumeResultClass('error-message');
+        } else {
+          const resultNode = xmlDoc.getElementsByTagName('PauseResult')[0];
+          const resultText = resultNode ? resultNode.textContent : 'پاسخی دریافت نشد.';
+          setResumeResult(resultText);
+          setResumeResultClass('success-message');
+        }
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      setResumeResult('خطا در توقف پروژه');
+      setResumeResultClass('error-message');
+      console.error('Pause SOAP error:', error);
+    }
+  };
+
+  const handleBreak = async () => {
+    if (!curPrjId) {
+      setResumeResult('شناسه پروژه معتبر یافت نشد');
+      setResumeResultClass('error-message');
+      return;
+    }
+    setResumeResult('');
+    setResumeResultClass('');
+    try {
+      const soapEnvelope = `<?xml version="1.0" encoding="utf-8"?>
+      <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+          <Break xmlns="http://tempuri.org/">
+            <strProjectsId>${curPrjId}</strProjectsId>
+          </Break>
+        </soap:Body>
+      </soap:Envelope>`;
+      const response = await fetch('http://localhost:3001/api/soap-proxy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/xml; charset=utf-8',
+          'SOAPAction': 'http://tempuri.org/Break'
+        },
+        body: soapEnvelope
+      });
+      if (response.ok) {
+        const data = await response.text();
+        const parser = new window.DOMParser();
+        const xmlDoc = parser.parseFromString(data, 'text/xml');
+        const faultNode = xmlDoc.getElementsByTagName('soap:Fault')[0] || xmlDoc.getElementsByTagName('Fault')[0];
+        if (faultNode) {
+          const faultString = faultNode.getElementsByTagName('faultstring')[0]?.textContent || 'Unknown SOAP Fault';
+          const faultCode = faultNode.getElementsByTagName('faultcode')[0]?.textContent || '';
+          setResumeResult(`SOAP Fault${faultCode ? ` [${faultCode}]` : ''}: ${faultString}`);
+          setResumeResultClass('error-message');
+        } else {
+          const resultNode = xmlDoc.getElementsByTagName('BreakResult')[0];
+          const resultText = resultNode ? resultNode.textContent : 'پاسخی دریافت نشد.';
+          setResumeResult(resultText);
+          setResumeResultClass('success-message');
+        }
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      setResumeResult('خطا در توقف پروژه (Break)');
+      setResumeResultClass('error-message');
+      console.error('Break SOAP error:', error);
+    }
+  };
+
+  // Initial form state for reset
+  const initialFormState = {
+    telFileName: '',
+    haveInternalWave: true,
+    internalWaveNo: 700,
+    fullPathWavFileName: '',
+    allowableStartHour: 8,
+    allowableStartMinute: 0,
+    allowableEndHour: 21,
+    allowableEndMinute: 0,
+    desiredSendNo: 1,
+    tersholdNo: 10000,
+    testRingtime: 13,
+    testNum1: '',
+    testNum2: '',
+    testNum3: '',
+    callerId: 5000,
+    mainRingTime: 45,
+    priority: 3
+  };
+
+  const handleResetForm = () => {
+    setForm(initialFormState);
+    setTelFileContent('');
+    setWaveFileUrl('');
+  };
+
   return (
     <div className="Dashboard-main-container">
       <div style={{ padding: 24, background: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)', minHeight: '100vh' }}>
@@ -262,44 +455,42 @@ function Dashboard() {
             <span style={{ fontSize: '0.98rem', color: '#555' }}>{form.haveInternalWave ? 'Yes' : 'No'}</span>
           </div>
           <div className="Dashboard-form-row">
-    <label>3 - internalWaveNo</label>
-    <select
-      name="internalWaveNo"
-      value={form.internalWaveNo}
-      onChange={handleFormChange}
-      style={{ width: 80 }}
-    >
-      {Array.from({ length: 24 }, (_, i) => 700 + i).map(n => (
-        <option key={n} value={n}>{n}</option>
-      ))}
-    </select>
-  </div>
-          <div className="Dashboard-form-row">
-            <label>4 - fullPathWavFileName</label>
-            <input
-              type="text"
-              name="fullPathWavFileName"
-              value={form.fullPathWavFileName}
+            <label>3 - internalWaveNo</label>
+            <select
+              name="internalWaveNo"
+              value={form.internalWaveNo}
               onChange={handleFormChange}
-              style={{ width: 120 }}
-              disabled={form.haveInternalWave}
-            />
-            <button
-              type="button"
-              onClick={handleWaveFileBrowse}
+              style={{ width: 80 }}
             >
-              Browse Wave File
-            </button>
-            <input
-              type="file"
-              accept=".wav"
-              style={{ display: 'none' }}
-              ref={waveFileInputRef}
-              onChange={handleWaveFileChange}
-            />
+              {Array.from({ length: 24 }, (_, i) => 700 + i).map(n => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+          {/* Move wave file field to a new line under internalWaveNo */}
+          <div className="Dashboard-form-row" style={{ alignItems: 'center', width: '100%' }}>
+            <label>4 - fullPathWavFileName</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+              <input
+                type="text"
+                name="fullPathWavFileName"
+                value={form.fullPathWavFileName}
+                onChange={handleFormChange}
+                style={{ minWidth: 120, width: '100%' }}
+                disabled={form.haveInternalWave}
+              />
+              <button type="button" onClick={handleWaveFileBrowse}>Browse Wave File</button>
+              <input
+                type="file"
+                accept=".wav"
+                style={{ display: 'none' }}
+                ref={waveFileInputRef}
+                onChange={handleWaveFileChange}
+              />
+            </div>
           </div>
           {waveFileUrl && !form.haveInternalWave && (
-            <div style={{ marginTop: 8, marginBottom: 8 }}>
+            <div className="Dashboard-form-row" style={{ width: '100%' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -313,6 +504,7 @@ function Dashboard() {
               <audio id="wave-audio" src={waveFileUrl} controls style={{ verticalAlign: 'middle' }} />
             </div>
           )}
+          {/* Row 5: Allowable Start Time */}
           <div className="Dashboard-form-row">
             <label>5 - allowableStartHour</label>
             <input
@@ -337,6 +529,7 @@ function Dashboard() {
               max={59}
             />
           </div>
+          {/* Row 7: Allowable End Time */}
           <div className="Dashboard-form-row">
             <label>7 - allowableEndHour</label>
             <input
@@ -361,18 +554,22 @@ function Dashboard() {
               max={59}
             />
           </div>
+          {/* Row 9: Desired Send No */}
           <div className="Dashboard-form-row">
             <label>9 - desiredSendNo</label>
             <input type="number" name="desiredSendNo" value={form.desiredSendNo} onChange={handleFormChange} style={{ width: 40 }} />
           </div>
+          {/* Row 10: Tershold No */}
           <div className="Dashboard-form-row">
             <label>10 - tersholdNo</label>
             <input type="number" name="tersholdNo" value={form.tersholdNo} onChange={handleFormChange} style={{ width: 70 }} />
           </div>
+          {/* Row 11: Test Ringtime */}
           <div className="Dashboard-form-row">
             <label>11 - testRingtime</label>
             <input type="number" name="testRingtime" value={form.testRingtime} onChange={handleFormChange} style={{ width: 40 }} />
           </div>
+          {/* Row 12: Test Numbers */}
           <div className="Dashboard-form-row">
             <label>10 - testNum1</label>
             <input
@@ -412,6 +609,7 @@ function Dashboard() {
               placeholder="09xxxxxxxxx or 8 digits"
             />
           </div>
+          {/* Row 13: Caller ID */}
           <div className="Dashboard-form-row">
             <label>15 - callerId</label>
             <select
@@ -426,10 +624,12 @@ function Dashboard() {
               ))}
             </select>
           </div>
+          {/* Row 14: Main Ring Time */}
           <div className="Dashboard-form-row">
             <label>16 - mainRingTime</label>
             <input type="number" name="mainRingTime" value={form.mainRingTime} onChange={handleFormChange} style={{ width: 50 }} />
           </div>
+          {/* Row 15: Priority */}
           <div className="Dashboard-form-row">
             <label>17 - Priority</label>
             <select
@@ -516,13 +716,18 @@ function Dashboard() {
               type="text"
               style={{ width: 100 }}
               placeholder="Project ID"
+              value={curPrjId}
+              onChange={(e) => setCurPrjId(e.target.value)}
             />
-            <button type="button">درخواست تنظیمات</button>
-            <button type="button">Resume</button>
-            <button type="button">Pause</button>
-            <button type="button">Break</button>
-            <button type="button">Reset</button>
+            <button type="button" onClick={handleResume}>Resume</button>
+            <button type="button" onClick={handlePause}>Pause</button>
+            <button type="button" onClick={handleBreak}>Break</button>
           </div>
+          {resumeResult && (
+            <div className={resumeResultClass} style={{ marginTop: 8 }}>
+              {resumeResult}
+            </div>
+          )}
         </div>
         {/* New tab: ایجاد پروژه */}
         <div className="Dashboard-card" style={{ marginTop: 16, maxWidth: 1000, width: '100%' }}>
@@ -534,6 +739,18 @@ function Dashboard() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
             <button type="button">Send=&gt;</button>
+          </div>
+        </div>
+        {/* New tab: Reset Form */}
+        <div className="Dashboard-card" style={{ marginTop: 16, maxWidth: 1000, width: '100%' }}>
+          <div className="Dashboard-section-title" style={{ margin: '0 0 12px 0' }}>
+            Reset Form
+          </div>
+          <div style={{ marginBottom: 16, color: '#666', fontSize: '0.98rem' }}>
+            برای بازنشانی تمام فیلدهای فرم به حالت اولیه، روی دکمه زیر کلیک کنید.
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <button type="button" onClick={handleResetForm}>Reset Form</button>
           </div>
         </div>
         <div style={{ marginTop: 10, fontWeight: 500 }}>Result</div>
